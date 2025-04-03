@@ -11,8 +11,8 @@ app.use(express.json());
 app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
 
 app.use("/customer/auth/*", function auth(req, res, next) {
-    console.log("Session Data: ", req.session);  // Log session data
-    console.log("Authorization Token: ", req.session.authorization);  // Log token data
+    console.log("Session Data: ", req.session);
+    console.log("Authorization Token: ", req.session.authorization);
     
     if (req.session.authorization) {
         let token = req.session.authorization['accessToken'];
@@ -20,7 +20,7 @@ app.use("/customer/auth/*", function auth(req, res, next) {
         jwt.verify(token, 'your_jwt_secret', (err, user) => {
             if (!err) {
                 req.user = user;
-                next(); // Proceed to the next middleware
+                next();
             } else {
                 return res.status(403).json({ message: "User not authenticated" });
             }

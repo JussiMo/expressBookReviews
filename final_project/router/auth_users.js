@@ -5,11 +5,11 @@ const regd_users = express.Router();
 
 let users = [];
 
-const isValid = (username)=>{ //returns boolean
+const isValid = (username)=>{
   return users.some(user => user.username === username);
 }
 
-const authenticatedUser = (username,password)=>{ //returns boolean
+const authenticatedUser = (username,password)=>{
   return users.some(user => user.username === username && user.password === password);
 }
 
@@ -17,28 +17,22 @@ const authenticatedUser = (username,password)=>{ //returns boolean
 regd_users.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  // Check if the username and password are provided in the request body
   if (!username || !password) {
       return res.status(400).json({ message: "Username and password are required." });
   }
 
-  // Find the user by username
   const user = users.find(user => user.username === username);
 
-  // If the user does not exist or the password doesn't match
   if (!user || user.password !== password) {
       return res.status(401).json({ message: "Invalid username or password" });
   }
 
-  // If login is successful, create a JWT and store it in the session
   const token = jwt.sign({ username: user.username }, 'your_jwt_secret');
 
-  // Store the token in the session
   req.session.authorization = {
       accessToken: token
   };
 
-  // Send the token as a response (just in case the front-end needs it)
   return res.status(200).json({ message: "Login successful", token: token });
 });
 
@@ -49,7 +43,7 @@ regd_users.post("/login", (req, res) => {
 regd_users.put("/auth/review/:isbn", (req, res) => {
   const { isbn } = req.params;
   const { review } = req.body;
-  const token = req.headers['authorization']?.split(' ')[1];  // Extract token from "Bearer <token>"
+  const token = req.headers['authorization']?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ message: "Authorization token missing" });
@@ -58,7 +52,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   try {
     const decoded = jwt.verify(token, 'your_jwt_secret');
 
-    const username = decoded.username;  // Retrieve the username from the decoded token
+    const username = decoded.username;
 
     if (!books[isbn]) {
       return res.status(404).json({ message: "Book not found" });
@@ -74,15 +68,15 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 
 regd_users.delete("/auth/review/:isbn", (req, res) => {
   const { isbn } = req.params;
-  const token = req.headers['authorization']?.split(' ')[1];  // Extract token from "Bearer <token>"
+  const token = req.headers['authorization']?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ message: "Authorization token missing" });
   }
 
   try {
-    const decoded = jwt.verify(token, 'your_jwt_secret');  // Ensure the secret is the same
-    const username = decoded.username;  // Get the username from the decoded token
+    const decoded = jwt.verify(token, 'your_jwt_secret');
+    const username = decoded.username;
 
     if (!books[isbn]) {
       return res.status(404).json({ message: "Book not found" });
